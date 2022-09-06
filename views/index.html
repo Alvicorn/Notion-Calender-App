@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src='./../server.js'></script>
+    <style>
+        body {
+        font-family: 'Trebuchet MS','Lucida Sans Unicode','Lucida Grande', 'Lucida Sans', 'Arial', 'sans-serif';
+        font-size: 20px;   
+        color: #000000;
+        text-align: center;
+        }
+
+        #reccurence-section {
+            display:none;
+        } 
+
+    </style>
+    
+    <title>Document</title>
+</head>
+    <title>Notion Calendar Event Creator Test</title>
+<body>
+    <h1>Notion Calendar Event Creator Test</h1>
+    <form action="/" method="POST">
+        <div>
+            <label>Event Name</label>
+            <div>
+                <input type="text" name="eventName">
+            </div>
+        </div>
+        <div>
+            <label>Description</label>
+            <div>
+                <textarea name="description" maxlength="500" placeholder="max 500 characters"></textarea>
+            </div>
+        </div>
+        <div>
+            <label for="person"><h3>Person</h3></label>
+            <div name="person">
+                <label>Kayla<input type="checkbox" name="kayla"></label>
+                <label>Alvin<input type="checkbox" name="alvin"></label>
+            </div>
+        </div>
+        <h3>Date</h3>
+        <div>
+            <label for="startDate">Start Date</label>
+            <input type="datetime-local" name="startDate">
+        </div>
+        <div>
+            <label for="endDate">End Date</label>
+            <input type="datetime-local" name="endDate">
+        </div>
+        <div>
+            <label>Recurring Event?</label>
+            <input type="checkbox" name="recurringCheckbox" id="recurringCheckbox" onclick="showHideReccurence()">
+            <script>
+                
+                function showHideReccurence() {
+                    if(document.getElementById("recurringCheckbox").checked)
+                        document.getElementById("reccurence-section").style.display = "block";
+                    else 
+                        document.getElementById("reccurence-section").style.display = "none";
+                }
+
+            </script>
+        <div>
+            <div id="reccurence-section">
+                <div name="days-of-the-week">
+                    <label>Monday <input type="checkbox" name="monday" id="monday"></label>
+                    <label>Tuesday <input type="checkbox" name="tuesday" id="tuesday"></label>
+                    <label>Wednesday <input type="checkbox" name="wednesday" id="wednesday"></label>
+                    <label>Thursday <input type="checkbox"vname="thursday" id="thursday"></label>
+                    <label>Friday <input type="checkbox" name="friday" id="friday"></label>
+                    <label>Saturday <input type="checkbox" name="saturday" id="saturday"></label>
+                    <label>Sunday <input type="checkbox" name="sunday" id="sunday"></label>
+                </div>
+                <div>
+                    <label>Number of reccurences</label>
+                    <div>
+                        <input type="number" name="recurrences" id="reccurrences" min="1" placeholder="recurrence in weeks">
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" name="forever" id="forever" value="false" onclick="foreverReccurenceState()"> forever
+                        </label>
+                        <script>
+                            
+                                function foreverReccurenceState() {
+                                    if(document.getElementById("forever").checked) {
+                                        document.getElementById("reccurrences").disabled = true;
+                                        document.getElementById("reccurrences").value = 0;
+                                    }
+                                    else 
+                                        document.getElementById("reccurrences").disabled = false;
+                                }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <button type="submit" name="submit">Submit</button>
+        </div>
+    </form>
+</body>
+</html>
