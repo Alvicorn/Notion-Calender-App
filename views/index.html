@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src='./../server.js'></script>
     <style>
         body {
         font-family: 'Trebuchet MS','Lucida Sans Unicode','Lucida Grande', 'Lucida Sans', 'Arial', 'sans-serif';
@@ -22,7 +21,7 @@
     <title>Document</title>
 </head>
     <title>Notion Calendar Event Creator Test</title>
-<body>
+<body onload="loadPeople()">
     <h1>Notion Calendar Event Creator Test</h1>
     <form action="/" method="POST">
         <div>
@@ -39,9 +38,36 @@
         </div>
         <div>
             <label for="person"><h3>Person</h3></label>
-            <div name="person">
-                <label>Kayla<input type="checkbox" name="kayla"></label>
-                <label>Alvin<input type="checkbox" name="alvin"></label>
+            <div name="person" id="container">
+                <!-- <button type="button" id="button">test button</button> -->
+                <!-- <select name="peopleIDs" id="peopleIDs" onload="loadPeople()" multiple> -->
+                    <script>
+                            function loadPeople() {
+                                const people = ["Kayla", "Alvin"];    
+                                people.forEach((person) => {
+                                    var checkbox = document.createElement('input');
+                                    checkbox.type = 'checkbox';
+                                    checkbox.id = person;
+                                    checkbox.name = person;
+                                    checkbox.value = person;
+                                
+                                    var label = document.createElement('label')
+                                    label.htmlFor = person;
+                                    label.appendChild(document.createTextNode(person));
+                                
+                                    var br = document.createElement('br');
+                                
+                                    var container = document.getElementById('container');
+                                    container.appendChild(checkbox);
+                                    container.appendChild(label);
+                                    container.appendChild(br);
+                                });
+                        }
+                
+                    </script>   
+                <!-- </select> -->
+                <!-- <label>Kayla<input type="checkbox" name="kayla"></label>
+                <label>Alvin<input type="checkbox" name="alvin"></label>  -->
             </div>
         </div>
         <h3>Date</h3>

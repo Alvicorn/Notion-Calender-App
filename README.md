@@ -8,5 +8,5 @@ This desktop application is designed to create an event (singleton or recurring)
 ## Development
 * To run, type in the terminal
 ```
-npm run
+npm start
 ```

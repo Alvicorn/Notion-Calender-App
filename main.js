@@ -1,4 +1,6 @@
 require("dotenv").config();
+const electron = require("electron");
+require("electron-reload")(__dirname);
 
 const { app, BrowserWindow } = require("electron");
 

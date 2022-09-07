@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^18.2.4"
+    "electron": "^18.2.4",
+    "electron-reload": "^2.0.0-alpha.1"
   },
   "dependencies": {
     "@notionhq/client": "^1.0.4",
