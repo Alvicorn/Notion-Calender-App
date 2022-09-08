@@ -1,12 +1,62 @@
 require("dotenv").config();
 const express = require('express');
-const { createEvent } = require('./notion')
+const { createEvent, getTags } = require('./notion')
 const app = express();
 
 app.set('views', './views');
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.static(__dirname + "/Notion-API-Calender/views"));
+
+
+// load tags initially
+let tags = [];
+let originalTags = [];
+getTags().then(data => {
+    tags = data;
+    tags.forEach(tag => {originalTags.push(tag);});
+
+    // write to json
+    var json = JSON.stringify(tags, null, 2);
+    var fs = require('fs');
+    fs.writeFile("data/people.json", json, 'utf8', err => {
+        if (err) {
+            return console.log(err);
+        } else {    
+            console.log("people.json is populated");
+        }
+    });
+});
+
+// update tags everyday
+setInterval(async () => {
+    tags = await getTags();
+    // only update the json file if the lists are different
+    const tagsUpdated = (tags, originalTags) => {
+        return (
+          tags.length === originalTags.length && 
+          tags.every((el) => originalTags.includes(el))
+        );
+    };
+    if (tagsUpdated) {
+        // write to json
+        var json = JSON.stringify(tags, null, 2);
+        var fs = require('fs');
+        fs.writeFile("data/people.json", json, 'utf8', err => {
+            if (err) {
+                return console.log(err);
+            } else {    
+                console.log("people.json is updated");
+            }
+        });
+        // update originalTags
+        tags.forEach(tag => {originalTags.push(tag);});
+    }
+
+
+}, 1000 * 60 * 60 * 24 ); // 1000 ms/second * 60 seconds/minute * 60 minutes/hour * 24 hours/day 
+
+
 
 app.get("/", (req, res) => {
     res.sendFile(__dirname + '/views/index.html');
@@ -15,11 +65,34 @@ app.get("/", (req, res) => {
 app.post("/", (req, res) => {
     let eventName = req.body.eventName;
     let description = req.body.description;
-    let kayla = req.body.kayla; // returns a string "on" or "off"
-    let alvin = req.body.alvin; // returns a string "on" or "off"
+    let location = req.body.location;
+    let people = [];
+    people = req.body.people;
     let startDate = req.body.startDate; //returns a string with date in iso 8601
     let endDate = req.body.endDate; //returns a string with date in iso 8601
     
+    // filter the people names and get their peopleIDs by comparing with all possible tags
+    let peopleIDs = [];
+    if (people != null) {
+        if (Array.isArray(people)) { // list of more than one tag
+            people.forEach(person => {
+                for (let i = 0; i < tags.length; i++) {
+                    if (tags[i].name == person) {
+                        console.log(tags[i])
+                        peopleIDs.push(tags[i]);
+                    }
+                }
+            })
+        } else { // only one tag
+            for (let i = 0; i < tags.length; i++) {
+                if (tags[i].name == people) {
+                    console.log(tags[i])
+                    peopleIDs.push(tags[i]);
+                }
+            }
+        }
+    }
+
     // dealing with recurring events
     let recurringCheckbox = req.body.recurringCheckbox;
     let monday = req.body.monday;
@@ -43,6 +116,7 @@ app.post("/", (req, res) => {
         endDate = new Date();
     else
         endDate = new Date(endDate);
+
 
     // for non-recurring events
     if (recurringCheckbox === "on") {
@@ -99,53 +173,71 @@ app.post("/", (req, res) => {
                 if(currentDay === 0 && sunday === "on") {
                     createEvent({ eventName: eventName, 
                         description: description, 
-                        kayla: kayla, 
-                        alvin: alvin, 
+                        location: location,
+                        people: (Array.isArray(peopleIDs) ? peopleIDs  : [peopleIDs].map(id => {
+                            console.log(id.name);
+                            return {id: id.id};
+                        })),
                         startDate: startDate, 
-                        endDate: endDate });  
+                        endDate: endDate });
                 }
 
                 else if(currentDay === 1 && monday === "on") {
                     createEvent({ eventName: eventName, 
                         description: description, 
-                        kayla: kayla, 
-                        alvin: alvin, 
+                        location: location,
+                        people: (Array.isArray(peopleIDs) ? peopleIDs  : [peopleIDs].map(id => {
+                            console.log(id.name);
+                            return {id: id.id};
+                        })),
                         startDate: startDate, 
-                        endDate: endDate });  
+                        endDate: endDate }); 
                 }
 
                 else if(currentDay === 2 && tuesday === "on") {
                     createEvent({ eventName: eventName, 
                         description: description, 
-                        kayla: kayla, 
-                        alvin: alvin, 
+                        location: location,
+                        people: (Array.isArray(peopleIDs) ? peopleIDs  : [peopleIDs].map(id => {
+                            console.log(id.name);
+                            return {id: id.id};
+                        })),
                         startDate: startDate, 
-                        endDate: endDate });  
+                        endDate: endDate });
                 }
 
                 else if(currentDay === 3 && wednesday === "on") {
                     createEvent({ eventName: eventName, 
                         description: description, 
-                        kayla: kayla, 
-                        alvin: alvin, 
+                        location: location,
+                        people: (Array.isArray(peopleIDs) ? peopleIDs  : [peopleIDs].map(id => {
+                            console.log(id.name);
+                            return {id: id.id};
+                        })),
                         startDate: startDate, 
-                        endDate: endDate });  
+                        endDate: endDate });
                 }
 
                 else if(currentDay === 4 && thursday === "on") {
                     createEvent({ eventName: eventName, 
                         description: description, 
-                        kayla: kayla, 
-                        alvin: alvin, 
+                        location: location,
+                        people: (Array.isArray(peopleIDs) ? peopleIDs  : [peopleIDs].map(id => {
+                            console.log(id.name);
+                            return {id: id.id};
+                        })),
                         startDate: startDate, 
-                        endDate: endDate });  
+                        endDate: endDate });
                 }
 
                 else if(currentDay === 5 && friday === "on") {
                     createEvent({ eventName: eventName, 
                         description: description, 
-                        kayla: kayla, 
-                        alvin: alvin, 
+                        location: location,
+                        people: (Array.isArray(peopleIDs) ? peopleIDs  : [peopleIDs].map(id => {
+                            console.log(id.name);
+                            return {id: id.id};
+                        })),
                         startDate: startDate, 
                         endDate: endDate });  
                 }
@@ -153,10 +245,13 @@ app.post("/", (req, res) => {
                 else if(currentDay === 6 && saturday === "on") {
                     createEvent({ eventName: eventName, 
                         description: description, 
-                        kayla: kayla, 
-                        alvin: alvin, 
+                        location: location,
+                        people: (Array.isArray(peopleIDs) ? peopleIDs  : [peopleIDs].map(id => {
+                            console.log(id.name);
+                            return {id: id.id};
+                        })),
                         startDate: startDate, 
-                        endDate: endDate });  
+                        endDate: endDate }); 
                 }
 
                 // set up for the next day
@@ -170,17 +265,18 @@ app.post("/", (req, res) => {
     }
 
     else {
+
         createEvent({ eventName: eventName, 
             description: description, 
-            kayla: kayla, 
-            alvin: alvin, 
+            location: location,
+            people: (Array.isArray(peopleIDs) ? peopleIDs  : [peopleIDs].map(id => {
+                console.log(id.name);
+                return {id: id.id};
+            })),
             startDate: startDate, 
             endDate: endDate });
     }
 
-        
-
-    // res.send("return: "+ recurringCheckbox);
     res.redirect("/results");
 })
 app.get("/results", (req, res) => {

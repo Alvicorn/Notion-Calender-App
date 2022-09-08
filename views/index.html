@@ -12,12 +12,19 @@
         text-align: center;
         }
 
+        select {
+            width: 20%;
+        }
+
         #reccurence-section {
             display:none;
         } 
 
     </style>
-    
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- <script src = "../data/people.json"></script> -->
+
     <title>Document</title>
 </head>
     <title>Notion Calendar Event Creator Test</title>
@@ -37,38 +44,55 @@
             </div>
         </div>
         <div>
-            <label for="person"><h3>Person</h3></label>
-            <div name="person" id="container">
-                <!-- <button type="button" id="button">test button</button> -->
-                <!-- <select name="peopleIDs" id="peopleIDs" onload="loadPeople()" multiple> -->
+            <label>Location</label>
+            <div>
+                <textarea name="location" maxlength="100" placeholder="max 100 characters"></textarea>
+            </div>
+        </div>
+        
+            <label for="people"><h3>Person</h3></label>
+            
+                <select class="form-control" style="overflow: scroll" id="people" name="people" multiple="yes">
                     <script>
                             function loadPeople() {
-                                const people = ["Kayla", "Alvin"];    
+                                
+                                const people = [ 
+                                    {
+                                        "id": "VIXP",
+                                        "name": "Kayla"
+                                    },
+                                    {       
+                                        "id": "Fr]@",
+                                        "name": "Alvin"
+                                    }
+                                ];
+                                // people = getTags();
+                                
+                                var multiselect = document.getElementById("people");
+                                multiselect.setAttribute("multiple", "");
                                 people.forEach((person) => {
-                                    var checkbox = document.createElement('input');
-                                    checkbox.type = 'checkbox';
-                                    checkbox.id = person;
-                                    checkbox.name = person;
-                                    checkbox.value = person;
-                                
-                                    var label = document.createElement('label')
-                                    label.htmlFor = person;
-                                    label.appendChild(document.createTextNode(person));
-                                
-                                    var br = document.createElement('br');
-                                
-                                    var container = document.getElementById('container');
-                                    container.appendChild(checkbox);
-                                    container.appendChild(label);
-                                    container.appendChild(br);
+                                    var option = document.createElement("option");
+                                    option.text = person.name;
+                                    option.name = person.name;
+                                    option.id = person.id;
+                                    option.value = person.name;
+
+                                    multiselect.appendChild(option);
                                 });
+
+                                // allow multi-select without using ctrl-click
+                                jQuery('option').mousedown(function(e) {
+                                        e.preventDefault();
+                                        jQuery(this).toggleClass('selected');
+                                    
+                                        jQuery(this).prop('selected', !jQuery(this).prop('selected'));
+                                        return false;
+                                    });
+
                         }
-                
-                    </script>   
-                <!-- </select> -->
-                <!-- <label>Kayla<input type="checkbox" name="kayla"></label>
-                <label>Alvin<input type="checkbox" name="alvin"></label>  -->
-            </div>
+                    </script>  
+                </select> 
+            
         </div>
         <h3>Date</h3>
         <div>
@@ -81,10 +105,10 @@
         </div>
         <div>
             <label>Recurring Event?</label>
-            <input type="checkbox" name="recurringCheckbox" id="recurringCheckbox" onclick="showHideReccurence()">
+            <input type="checkbox" name="recurringCheckbox" id="recurringCheckbox" onclick="showReccurence()">
             <script>
                 
-                function showHideReccurence() {
+                function showReccurence() {
                     if(document.getElementById("recurringCheckbox").checked)
                         document.getElementById("reccurence-section").style.display = "block";
                     else 
