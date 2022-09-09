@@ -1,7 +1,10 @@
 const { Client } = require("@notionhq/client");
 
 const notion = new Client({ auth: process.env.NOTION_API_KEY});
+const fs = require('fs');
 
+var IDFile = "data/IDs.json";
+var dbInfo;
 
 // Description: Create a new event for Notion calender
 //              @parm eventName: name of the event
@@ -13,11 +16,15 @@ const notion = new Client({ auth: process.env.NOTION_API_KEY});
 // Preconditions: people cannot be empty
 async function createEvent({ eventName, description, location, people, startDate, endDate }) {
 
+    if (dbInfo === undefined) {
+        loadIDsFromJSON();
+    }
+
     try {
         await notion.pages.create({
             parent: { database_id: process.env.NOTION_DATABASE_ID},
             properties: {
-                [process.env.NOTION_EVENT_ID]: { 
+                [dbInfo[0].eventID]: { 
                     title: [
                         {
                             type: 'text',
@@ -27,7 +34,7 @@ async function createEvent({ eventName, description, location, people, startDate
                         },
                     ],
                 },        
-                [process.env.NOTION_DESCRIPTION_ID]: { 
+                [dbInfo[0].descriptionID]: { 
                     rich_text: [
                         { 
                             type: 'text',
@@ -37,7 +44,7 @@ async function createEvent({ eventName, description, location, people, startDate
                         },
                     ],
                 },
-                [process.env.NOTION_LOCATION_ID]: { 
+                [dbInfo[0].locationID]: { 
                     rich_text: [
                         { 
                             type: 'text',
@@ -47,14 +54,14 @@ async function createEvent({ eventName, description, location, people, startDate
                         },
                     ],
                 },
-                [process.env.NOTION_DATE_ID]: { 
+                [dbInfo[0].dateID]: { 
                     date: { 
                     start: startDate, // ISO 8601
                     end: endDate,     // ISO 8601
                     time_zone: "Canada/Pacific"       
                     },
                 },
-                [process.env.NOTION_TAG_ID]: { 
+                [dbInfo[0].personID]: { 
                     multi_select: people 
                     
                 },
@@ -63,10 +70,16 @@ async function createEvent({ eventName, description, location, people, startDate
     } catch (err) {
         console.error(err);
     }
-
-
 }
 
+
+function loadIDsFromJSON() {
+    if (!fs.existsSync(IDFile)) {
+        setDatabase();
+    } 
+    let json = fs.readFileSync(IDFile);
+    dbInfo = JSON.parse(json);   
+}
 
 
 
@@ -74,11 +87,37 @@ async function createEvent({ eventName, description, location, people, startDate
 /**HELPER FUNCTIONS */
 // Description: Get the properties of the databases.S
 //              Used to get the IDs for each heading
-async function getDatabase() {
+
+
+
+async function setDatabase() {
+
     const response = await notion.databases.retrieve({ database_id: process.env.NOTION_DATABASE_ID});
-    console.log(response);
+
+    let databaseID = response.id.replaceAll("-", "");
+    let eventID = response.properties.Event.id;
+    let descriptionID = response.properties.Description.id;
+    let locationID = response.properties.Location.id;
+    let personID = response.properties.Person.id;
+    let dateID = response.properties.Date.id;
+
+    dbInfo = [ {
+            eventID: eventID,
+            descriptionID: descriptionID,
+            locationID: locationID,
+            personID: personID,
+            dateID: dateID
+        }
+    ]
+    var json = JSON.stringify(dbInfo, null, 2);
+    // write the database information to a JSON file
+    fs.writeFile(String(IDFile), json, err => {
+        if (err) throw err;
+        console.log("Database info is saved!");
+    });
+    return true;
 }
-// getDatabase() 
+// setDatabase() 
 
 
 // Description: Get the properties of each tag and store
@@ -99,4 +138,4 @@ function notionPropertiesByID(properties) {
     }, {});
 }
 
-module.exports = { createEvent, getTags };
+module.exports = { createEvent, getTags, setDatabase };

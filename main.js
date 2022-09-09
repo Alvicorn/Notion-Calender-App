@@ -3,25 +3,87 @@ const electron = require("electron");
 require("electron-reload")(__dirname);
 
 const { app, BrowserWindow } = require("electron");
+const { setDatabase } = require('./notion')
+
 
 const server = require("./app");
+const fs = require('fs');
+const dnsServer = "www.google.com"
 
+filename = "data/IDs.json";
 let mainWindow;
 
-function createWindow() {
-    mainWindow = new BrowserWindow({
-        width: 600,
-        height: 400,
-        webPreferences: {
-            nodeIntegration: true
+
+async function checkInternet() {
+    let connected = false;
+    // check internet connection
+    require('dns').resolve(dnsServer, err => {
+        if (!err) {
+            internetConnection = true;
+            console.log("Connected to internet");
+        }
+      });
+    return connected;
+}
+
+async function loadDB() {
+    let loaded = false;
+    let internetConnection = new Promise ((resolve, reject) => {
+        let connection = checkInternet();
+        if (connection) {
+            resolve();
+        } else {
+            reject("Can not connect to internet");
         }
     });
-
-    // mainWindow.loadURL("http://localhost:8000");
-    mainWindow.loadURL(`http://localhost:${process.env.PORT}`);
-    mainWindow.on("closed", () => {
-        mainWindow = null;
+    
+    internetConnection.then(() => {
+        if (!fs.existsSync(filename)) {
+            console.log("writing database info")
+            setDatabase();
+        } else {
+            console.log(filename + " exists");
+        }
+        loaded = true;
     });
+
+    internetConnection.catch((message) => {
+        console.log(message);
+    })
+
+    return loaded;
+}
+
+function createWindow() {
+    
+    let startUp = new Promise((resolve, reject) => {
+        let dbConnection = loadDB();
+        if (dbConnection) {
+            resolve("Connected to the Notion DB");
+        } else {
+            reject("Not connected to the Notion DB");
+        }
+    });
+    
+    startUp.then((message) => {
+        console.log(message);
+        mainWindow = new BrowserWindow({
+            width: 600,
+            height: 400,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+        // mainWindow.loadURL("http://localhost:8000");
+        mainWindow.loadURL(`http://localhost:${process.env.PORT}`);
+        mainWindow.on("closed", () => {
+            mainWindow = null;
+        });
+    });
+
+    startUp.catch((message) => {
+        console.log(message);
+    })
 }
 
 app.on("ready", createWindow);
@@ -41,6 +103,12 @@ app.on("activate", () => {
         createWindow();
     }
 });
+
+
+
+
+
+
 
 
 // end of main.js
