@@ -4,7 +4,7 @@ const notion = new Client({ auth: process.env.NOTION_API_KEY});
 const fs = require('fs');
 
 var IDFile = "data/IDs.json";
-var dbInfo;
+var dbInfo = undefined;
 
 // Description: Create a new event for Notion calender
 //              @parm eventName: name of the event
@@ -122,10 +122,15 @@ async function setDatabase() {
 
 // Description: Get the properties of each tag and store
 //              the properties in an array
-async function getTags() { 
+async function getTags() {
+
+    if (dbInfo === undefined) {
+        loadIDsFromJSON();
+    }
+
     const database = await notion.databases.retrieve({ 
         database_id: process.env.NOTION_DATABASE_ID});
-        return notionPropertiesByID(database.properties)[process.env.NOTION_TAG_ID].multi_select.options.map(option => {
+        return notionPropertiesByID(database.properties)[dbInfo[0].personID].multi_select.options.map(option => {
                 return { id: option.id, name: option.name}
             }); // filter out the colour info;
 } 

@@ -2,8 +2,9 @@ require("dotenv").config();
 const electron = require("electron");
 require("electron-reload")(__dirname);
 
-const { app, BrowserWindow } = require("electron");
-const { setDatabase } = require('./notion')
+const { app, BrowserWindow, ipcMain } = require("electron");
+// const { app, BrowserWindow } = require("electron");
+const { setDatabase, getTags } = require('./notion')
 
 
 const server = require("./app");
@@ -68,25 +69,42 @@ function createWindow() {
     startUp.then((message) => {
         console.log(message);
         mainWindow = new BrowserWindow({
-            width: 600,
-            height: 400,
+            width: 800,
+            height: 600,
             webPreferences: {
                 nodeIntegration: true
+                // nodeIntegration: true, // is default value after Electron v5
+                // contextIsolation: true, // protect against prototype pollution
+                // enableRemoteModule: false, // turn off remote
+                // preload: __dirname + "/scripts/preload.js" // use a preload script
             }
         });
+        // mainWindow.webContents.send("Tags", "hello");
         // mainWindow.loadURL("http://localhost:8000");
         mainWindow.loadURL(`http://localhost:${process.env.PORT}`);
+        mainWindow.setMenuBarVisibility(false)
+
         mainWindow.on("closed", () => {
             mainWindow = null;
         });
+
+        ipcMain.on("Tags", (event, args) => {
+            // Send result back to renderer process
+            win.webContents.send("Tags", getTags());    
+        });
+
     });
 
     startUp.catch((message) => {
         console.log(message);
     })
+
+
 }
 
 app.on("ready", createWindow);
+
+
 
 app.on("resize", (e,x,y) => {
     mainWindow.setSize(x,y);

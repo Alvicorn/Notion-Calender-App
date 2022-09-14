@@ -32,11 +32,12 @@
     <h1>Notion Calendar Event Creator Test</h1>
     <form action="/" method="POST">
         <div>
-            <label>Event Name</label>
+            <label id="test">Event Name</label>
             <div>
                 <input type="text" name="eventName">
             </div>
         </div>
+
         <div>
             <label>Description</label>
             <div>
@@ -56,6 +57,21 @@
                     <script>
                             function loadPeople() {
                                 
+                            // let people;
+
+                            // window.api.receive("Tags", (data) => {
+                                // people = data;
+                                // var name = getElementById("test");
+                                // name.innerHTML = "data";
+
+                                // console.log(`Received ${data} from main process`);
+                            // });
+                            // window.api.send("toMain", "some data")
+                                // let fs = require("fs");
+                                // let json = fs.readFileSync("../data/people/json");
+                                // let people = JSON.parse(json);   
+                            
+
                                 const people = [ 
                                     {
                                         "id": "VIXP",
@@ -70,7 +86,9 @@
                                 
                                 var multiselect = document.getElementById("people");
                                 multiselect.setAttribute("multiple", "");
+                                console.log(people);
                                 people.forEach((person) => {
+                                    console.log(person);
                                     var option = document.createElement("option");
                                     option.text = person.name;
                                     option.name = person.name;
@@ -136,9 +154,10 @@
                         <label>
                             <input type="checkbox" name="forever" id="forever" value="false" onclick="foreverReccurenceState()"> forever
                         </label>
-                        <script>
+                        <script type="text/javascript">
                             
                                 function foreverReccurenceState() {
+                                    
                                     if(document.getElementById("forever").checked) {
                                         document.getElementById("reccurrences").disabled = true;
                                         document.getElementById("reccurrences").value = 0;
